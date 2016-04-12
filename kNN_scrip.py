@@ -7,6 +7,9 @@ Created on Tue Apr 12 10:41:37 2016
 import kNN
 datingDataMat,datingLabels = kNN.file2matrix('datingTestSet2.txt')
 normMat, ranges, minVals = kNN.autoNorm(datingDataMat)
+kNN.datingClassTest()
+kNN.classifyPerson()
+kNN.handwritingClassTest()
 
 import matplotlib
 import matplotlib.pyplot as plt
