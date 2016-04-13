@@ -7,6 +7,30 @@ Created on Tue Apr 12 14:35:25 2016
 
 from math import log
 import operator
+def storeTree(inputTree,filename):
+    import pickle
+    fw = open(filename,'w')
+    pickle.dump(inputTree,fw)
+    fw.close()
+def grabTree(filename):
+    import pickle
+    fr = open(filename)
+    return pickle.load(fr)
+
+#决策树分类器
+def classify(inputTree, featLabels, testVec):
+    firstStr = inputTree.keys()[0]
+    secondDict = inputTree[firstStr]
+    #获取一个特征标签的index
+    featIndex = featLabels.index(firstStr)
+    for key in secondDict.keys():
+        if testVec[featIndex] == key:
+            #如果没有到叶子节点，则继续递归
+            if type(secondDict[key]).__name__=='dict':
+                classLabel = classify(secondDict[key],featLabels,testVec)
+            else: classLabel = secondDict[key]
+    return classLabel
+
 #一个数据集的熵=求和{每一个分类的概率p(x)*这个分类的信息}，分类x的信息l(x)=-log(p(x),2)
 def calShannonEnt(dataSet):
     #假设，数据最后一列是分类标签，每一行是一条记录
@@ -26,7 +50,7 @@ def calShannonEnt(dataSet):
         #每个分类的概率*信息        
         shannonEnt -= prob * log(prob,2)
     return shannonEnt
-
+#计算测试数据集
 def createDataSet():
     dataSet = [[1,1,'yes'],[1,1,'yes'],[1,0,'no'],[0,1,'no'],[0,1,'no']]
     labels = ['no surfacing','flippers']
@@ -42,6 +66,7 @@ def splitDataSet(dataSet, axis, value):
             reducedFeatVec.extend(featVec[axis+1:])
             retDataSet.append(reducedFeatVec)
     return retDataSet
+#选择最值特征
 def chooseBestFeatureToSplit(dataSet):
     #特征个数，最后一列是分类    
     numFeatures = len(dataSet[0]) -1
@@ -76,7 +101,7 @@ def majorityCnt(classList):
         classCount[vote]+=1
     sortedClassCount=sorted(classCount.iteritems(),key=operator.itemgetter(1),reverse=True)
     return sortedClassCount[0][0]
-#输入是数据集，和特征标签列表，也就是第几列叫什么
+#构建决策树，输入是数据集，和特征标签列表，也就是第几列叫什么
 def createTree(dataSet,labels):
     #生成标签列表（从最后一列得到）    
     classList = [example[-1] for example in dataSet]
