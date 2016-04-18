@@ -21,6 +21,41 @@ def loadDataSet():
 #Sigmoid函数，把一个实数放到0~1之间
 def sigmoid(inX):
     return 1.0/(1+exp(-inX))
+#改进的随机梯度上升算法
+def stocGradAscent1(dataMatrix,classLabels,numIter=150):
+    m,n = shape(dataMatrix)
+    weights = ones(n)
+    #重复150次迭代样本数据集，这次系数能收敛在一个稳定范围
+    for j in range(numIter): 
+        dataIndex = range(m)
+        for i in range(m):
+            #每次迭代时需要调整alpha,其实是alpha一开始大一点，迭代剧烈些，后面变小，收敛好
+            alpha = 4/(1.0+j+i)+0.01
+            #随机选取一个样本
+            randIndex = int(random.uniform(0,len(dataIndex)))
+            h = sigmoid(sum(dataMatrix[randIndex]*weights))
+            error = classLabels[randIndex]-h
+            weights = weights + alpha*error*dataMatrix[randIndex]
+            #原地删除list中的一个元素
+            del(dataIndex[randIndex])
+    return weights
+
+#随机/在线/增量 梯度上升算法
+def stocGradAscent0(dataMatrix,classLabels):
+    #获取样本规模    
+    m,n = shape(dataMatrix)
+    alpha = 0.01
+    #初始化系数，这里是一个array，而不是一列！    
+    weights = ones(n)
+    #迭代次数是数据量，比较小
+    for i in range(m):
+        #这里是每行数据做一次计算，得到差值都是数值而不是向量！
+        h = sigmoid(sum(dataMatrix[i]*weights))
+        #仅仅根据这一条记录，计算这次的误差
+        error = classLabels[i] - h
+        #仅仅根据这一次误差，修改一回系数
+        weights = weights + alpha * error * dataMatrix[i]
+    return weights
 
 def gradAscent(dataMatIn,classLabels):
     dataMatrix = mat(dataMatIn)
