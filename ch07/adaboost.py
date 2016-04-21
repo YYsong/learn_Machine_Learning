@@ -7,6 +7,20 @@ Created on Thu Apr 21 08:39:58 2016
 
 from numpy import *
 
+def loadDataSet(fileName):
+    numFeat = len(open(fileName).readline().split('\t'))
+    dataMat = []
+    labelMat = []
+    fr = open(fileName)
+    for line in fr.readlines():
+        lineArr = []
+        curLine = line.strip().split('\t')
+        for i in range(numFeat - 1):
+            lineArr.append(float(curLine[i]))
+        dataMat.append(lineArr)
+        labelMat.append(float(curLine[-1]))
+    return dataMat,labelMat
+
 def loadSimpData():
     datMat = matrix([[ 1. ,  2.1],
         [ 2. ,  1.1],
@@ -81,19 +95,19 @@ def adaBoostTrainDS(dataArr,classLabels,numIt=40):
     aggClassEst = mat(zeros((m,1)))
     for i in range(numIt):
         bestStump,error,classEst = buildStump(dataArr,classLabels,D)
-        print "D:",D.T
+#        print "D:",D.T
         #计算当前分类器的权重
         alpha = float(0.5*log((1.0-error)/max(error,1e-16)))
         bestStump['alpha']=alpha
         #分类器列表添加当前分类器
         weakClassArr.append(bestStump)
-        print "classEst: ",classEst.T
+#        print "classEst: ",classEst.T
         #为下一轮迭代计算D
         expon = multiply(-1*alpha*mat(classLabels).T,classEst)
         D = multiply(D,exp(expon))
         D = D/D.sum()
         aggClassEst += alpha * classEst
-        print "aggClassEst: ",aggClassEst.T
+#        print "aggClassEst: ",aggClassEst.T
         aggErrors = multiply(sign(aggClassEst)!=mat(classLabels).T,ones((m,1)))
         errorRate = aggErrors.sum()/m
         print "total error: ",errorRate,"\n"
